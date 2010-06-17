@@ -20,5 +20,12 @@ namespace SharpGs.Exceptions
         {
             GoogleMessage = content;
         }
+
+        public override string ToString()
+        {
+            if (GoogleMessage == null)
+                return base.ToString();
+            return GoogleMessage.ToString();
+        }
     }
 }

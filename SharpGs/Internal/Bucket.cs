@@ -1,7 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Xml.Linq;
+using SharpGs.Acl;
+using SharpGs.Acl.Internal;
 using SharpGs.RestApi;
 
 namespace SharpGs.Internal
@@ -25,14 +27,9 @@ namespace SharpGs.Internal
             get; internal set;
         }
 
-        public IEnumerable<IObject> Objects
+        public IObjectQuery Objects
         {
-            get
-            {
-                return
-                    _connector.Request(RequestMethod.GET, Name).Descendants(@"Contents").Select(
-                        obj => GoogleObject.FromXml(obj, _connector, this));
-            }
+            get { return new Query(this, _connector); }
         }
 
         public void AddObject(string key, byte[] content, string contentType)
@@ -62,11 +59,27 @@ namespace SharpGs.Internal
             _connector.Request(RequestMethod.DELETE, Name);
         }
 
+        public IAccessControlList Acl
+        {
+            get
+            {
+                var result = _connector.Request(RequestMethod.ACL_GET, Name);
+                return new AccessControlList(result, this);
+            }
+        }
+
+        public void AclSave(IAccessControlList modifiedAcl)
+        {
+            _connector.Request(RequestMethod.ACL_SET, Name, null, Encoding.UTF8.GetBytes(modifiedAcl.ToXmlString()), "application/xml");
+        }
+
         public static IBucket FromXml(XElement element, SharpGsClient connector)
         {
-            var bucket = new Bucket(connector);
-            bucket.Name = element.Descendants("Name").First().Value;
-            bucket.CreationDate = DateTime.Parse(element.Descendants("CreationDate").First().Value);
+            var bucket = new Bucket(connector)
+                             {
+                                 Name = element.Descendants("Name").First().Value,
+                                 CreationDate = DateTime.Parse(element.Descendants("CreationDate").First().Value)
+                             };
             return bucket;
         }
     }

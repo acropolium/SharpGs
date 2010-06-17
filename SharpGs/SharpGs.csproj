@@ -37,7 +37,28 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Acl\AclPermission.cs" />
+    <Compile Include="Acl\IAccessControlList.cs" />
+    <Compile Include="Acl\IAclEntry.cs" />
+    <Compile Include="Acl\Internal\AccessControlList.cs" />
+    <Compile Include="Acl\Internal\AclEntry.cs" />
+    <Compile Include="Acl\IScope.cs" />
+    <Compile Include="Acl\ScopeBuilder.cs" />
+    <Compile Include="Acl\Scopes\BaseScope.cs" />
+    <Compile Include="Acl\Scopes\AllUsers.cs" />
+    <Compile Include="Acl\Scopes\AllAuthenticatedUsers.cs" />
+    <Compile Include="Acl\Scopes\GroupByDomain.cs" />
+    <Compile Include="Acl\Scopes\GroupByEmail.cs" />
+    <Compile Include="Acl\Scopes\GroupById.cs" />
+    <Compile Include="Acl\Scopes\UserByEmail.cs" />
+    <Compile Include="Acl\Scopes\UserById.cs" />
+    <Compile Include="Acl\ScopeType.cs" />
+    <Compile Include="Exceptions\UnsupportedAcl.cs" />
+    <Compile Include="IAclSetup.cs" />
+    <Compile Include="Internal\StringBuilderHelper.cs" />
+    <Compile Include="Internal\Query.cs" />
     <Compile Include="IObjectData.cs" />
+    <Compile Include="IObjectQuery.cs" />
     <Compile Include="SharpGsClient.cs" />
     <Compile Include="Exceptions\BucketNameUnavailable.cs" />
     <Compile Include="Exceptions\SignatureDoesNotMatch.cs" />

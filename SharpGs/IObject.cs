@@ -2,7 +2,7 @@
 
 namespace SharpGs
 {
-    public interface IObject
+    public interface IObject : IAclSetup
     {
         IBucket Bucket { get; }
         IOwner Owner { get; }
@@ -11,7 +11,6 @@ namespace SharpGs
         string ETag { get; }
         string StorageClass { get; }
         long Size { get; }
-
         IObjectData Get();
         void Delete();
     }

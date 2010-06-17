@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using System.Xml.Linq;
+using SharpGs.Acl;
+using SharpGs.Acl.Internal;
 using SharpGs.RestApi;
 
 namespace SharpGs.Internal
@@ -68,14 +71,34 @@ namespace SharpGs.Internal
 
         public static IObject FromXml(XElement element, SharpGsClient connector, IBucket bucket)
         {
-            var obj = new GoogleObject(connector, bucket);
-            obj.ETag = element.Descendants("ETag").Select(o => o.Value).FirstOrDefault();
-            obj.Key = element.Descendants("Key").Select(o => o.Value).FirstOrDefault();
-            obj.LastModified = DateTime.Parse(element.Descendants("LastModified").Select(o => o.Value).FirstOrDefault() ?? DateTime.MinValue.ToString());
-            obj.Size = long.Parse(element.Descendants("Size").Select(o => o.Value).FirstOrDefault() ?? "0");
-            obj.StorageClass = element.Descendants("StorageClass").Select(o => o.Value).FirstOrDefault();
-            obj.Owner = Internal.Owner.FromXml(element.Descendants("Owner").FirstOrDefault(), connector);
+            var obj = new GoogleObject(connector, bucket)
+                          {
+                              ETag = element.Descendants("ETag").Select(o => o.Value).FirstOrDefault(),
+                              Key = element.Descendants("Key").Select(o => o.Value).FirstOrDefault(),
+                              LastModified =
+                                  DateTime.Parse(
+                                      element.Descendants("LastModified").Select(o => o.Value).FirstOrDefault() ??
+                                      DateTime.MinValue.ToString()),
+                              Size =
+                                  long.Parse(element.Descendants("Size").Select(o => o.Value).FirstOrDefault() ?? "0"),
+                              StorageClass = element.Descendants("StorageClass").Select(o => o.Value).FirstOrDefault(),
+                              Owner = Internal.Owner.FromXml(element.Descendants("Owner").FirstOrDefault(), connector)
+                          };
             return obj;
+        }
+
+        public IAccessControlList Acl
+        {
+            get
+            {
+                var result = _connector.Request(RequestMethod.ACL_GET, Bucket.Name, Key);
+                return new AccessControlList(result, this);
+            }
+        }
+
+        public void AclSave(IAccessControlList modifiedAcl)
+        {
+            _connector.Request(RequestMethod.ACL_SET, Bucket.Name, Key, Encoding.UTF8.GetBytes(modifiedAcl.ToXmlString()), "application/xml");
         }
     }
 }

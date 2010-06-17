@@ -9,12 +9,25 @@ namespace SharpGs.RestApi
     internal class RestApiClient : IDisposable
     {
         private readonly Uri _uri;
-        private readonly string _method;
+        private readonly RequestMethod _method;
 
-        public RestApiClient(Uri uri, string method)
+        public RestApiClient(Uri uri, RequestMethod method)
         {
             _uri = uri;
             _method = method;
+        }
+
+        internal static RequestMethod PureRequestMethod(RequestMethod method)
+        {
+            switch (method)
+            {
+                case RequestMethod.ACL_GET:
+                    return RequestMethod.GET;
+                case RequestMethod.ACL_SET:
+                    return RequestMethod.PUT;
+                default:
+                    return method;
+            }
         }
 
         public string Request(string authValue, DateTime date, byte[] content, string contentType, Bucket.ObjectHead objectHead, bool withData)
@@ -22,7 +35,7 @@ namespace SharpGs.RestApi
             try
             {
                 var request = (HttpWebRequest)WebRequest.Create(_uri);
-                request.Method = _method;
+                request.Method = PureRequestMethod(_method).ToString();
 
                 request.Headers.Add(@"Authorization", authValue);
                 if (content != null)

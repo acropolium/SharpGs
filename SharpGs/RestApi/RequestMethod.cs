@@ -6,6 +6,8 @@
         POST,
         PUT,
         DELETE,
-        HEAD
+        HEAD,
+        ACL_GET,
+        ACL_SET
     }
 }

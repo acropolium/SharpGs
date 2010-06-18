@@ -101,21 +101,22 @@ namespace SharpGs.Internal
             var canonicalResource = SyndicateCanonicalResource(requestMethod, bucket, path);
 
             var signatureOrigin = String.Format("{0}{1}", canonicalHeaders, canonicalResource);
-            var signature = Convert.ToBase64String(new HMACSHA1(Encoding.UTF8.GetBytes(AuthSecret)).ComputeHash(Encoding.UTF8.GetBytes(signatureOrigin)));
+            var signature =
+                Convert.ToBase64String(
+                    new HMACSHA1(Encoding.UTF8.GetBytes(AuthSecret)).ComputeHash(Encoding.UTF8.GetBytes(signatureOrigin)));
 
-            using (var api = new RestApiClient(ConnectionUrl(requestMethod, bucket, path, parameters), requestMethod))
-            {
-                if (objectHead != null)
-                    objectHead.Key = path;
-                var result = api.Request(SyndicateAuthValue(AuthKey, signature), dateO, content, contentTypeFixed, objectHead, withData);
-                if (String.IsNullOrEmpty(result))
-                    return null;
-                var responce = XDocument.Parse(FilterResponse(result));
-                var error = responce.Descendants(@"Error").FirstOrDefault();
-                if (error == null)
-                    return responce;
-                throw error.FindException();
-            }
+            var api = new RestApiClient(ConnectionUrl(requestMethod, bucket, path, parameters), requestMethod);
+            if (objectHead != null)
+                objectHead.Key = path;
+            var result = api.Request(SyndicateAuthValue(AuthKey, signature), dateO, content, contentTypeFixed,
+                                     objectHead, withData);
+            if (String.IsNullOrEmpty(result))
+                return null;
+            var responce = XDocument.Parse(FilterResponse(result));
+            var error = responce.Descendants(@"Error").FirstOrDefault();
+            if (error == null)
+                return responce;
+            throw error.FindException();
         }
 
         private static string FilterResponse(string response)

@@ -6,7 +6,7 @@ using SharpGs.Internal;
 
 namespace SharpGs.RestApi
 {
-    internal class RestApiClient : IDisposable
+    internal class RestApiClient
     {
         private readonly Uri _uri;
         private readonly RequestMethod _method;
@@ -30,66 +30,71 @@ namespace SharpGs.RestApi
             }
         }
 
+        private HttpWebRequest CreateRequest(string authValue, DateTime date, byte[] content, string contentType)
+        {
+            var request = (HttpWebRequest)WebRequest.Create(_uri);
+            request.Method = PureRequestMethod(_method).ToString();
+
+            request.Headers.Add(@"Authorization", authValue);
+            if (content != null)
+                request.Headers.Add(@"Content-MD5", Convert.ToBase64String(MD5.Create().ComputeHash(content)));
+            request.Date = date;
+            request.ContentLength = content == null ? 0 : content.Length;
+            request.ContentType = contentType;
+            request.KeepAlive = false;
+            if (content != null)
+                request.GetRequestStream().Write(content, 0, content.Length);
+            return request;
+        }
+
+        private static bool FetchDataFromResponse(HttpWebResponse response, Bucket.ObjectHead objectHead, bool withData)
+        {
+            if (objectHead == null)
+                return false;
+            objectHead.Size = response.ContentLength;
+            objectHead.ContentType = response.ContentType;
+            objectHead.ETag = response.Headers["ETag"];
+            objectHead.LastModified = response.LastModified;
+            if (withData)
+            {
+                objectHead.Content = new byte[objectHead.Size];
+                var read = (long)0;
+                var stream = response.GetResponseStream();
+                while (read < objectHead.Size)
+                {
+                    var toread = (int)((objectHead.Size - read) % 4048);
+                    read += stream.Read(objectHead.Content, 0, toread);
+                }
+                return true;
+            }
+            return false;
+        }
+
+        private static string StreamToString(Stream stream)
+        {
+            using (var reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
         public string Request(string authValue, DateTime date, byte[] content, string contentType, Bucket.ObjectHead objectHead, bool withData)
         {
             try
             {
-                var request = (HttpWebRequest)WebRequest.Create(_uri);
-                request.Method = PureRequestMethod(_method).ToString();
-
-                request.Headers.Add(@"Authorization", authValue);
-                if (content != null)
-                    request.Headers.Add(@"Content-MD5", Convert.ToBase64String(MD5.Create().ComputeHash(content)));
-                request.Date = date;
-                request.ContentLength = content == null ? 0 : content.Length;
-                request.ContentType = contentType;
-                request.KeepAlive = false;
-                if (content != null)
-                    request.GetRequestStream().Write(content, 0, content.Length);
+                var request = CreateRequest(authValue, date, content, contentType);
 
                 using (var response = (HttpWebResponse)request.GetResponse())
                 {
-                    var isData = false;
-                    if (response.StatusCode == HttpStatusCode.OK && objectHead != null)
-                    {
-                        objectHead.Size = response.ContentLength;
-                        objectHead.ContentType = response.ContentType;
-                        objectHead.ETag = response.Headers["ETag"];
-                        objectHead.LastModified = response.LastModified;
-                        if (withData)
-                        {
-                            isData = true;
-                            objectHead.Content = new byte[objectHead.Size];
-                            var read = (long)0;
-                            var stream = response.GetResponseStream();
-                            while (read < objectHead.Size)
-                            {
-                                var toread = (int)((objectHead.Size - read) % 4048);
-                                read += stream.Read(objectHead.Content, 0, toread);
-                            }
-                        }
-                    }
-                    if (!isData)
-                    {
-                        using (var reader = new StreamReader(response.GetResponseStream()))
-                        {
-                            return reader.ReadToEnd();
-                        }
-                    }
-                    return String.Empty;
+                    if (response.StatusCode == HttpStatusCode.OK && FetchDataFromResponse(response, objectHead, withData))
+                        return String.Empty;
+                    return StreamToString(response.GetResponseStream());
                 }
             }
             catch (WebException exception)
             {
-                using (var reader = new StreamReader(exception.Response.GetResponseStream()))
-                {
-                    return reader.ReadToEnd();
-                }
+                return StreamToString(exception.Response.GetResponseStream());
             }
-        }
-
-        public void Dispose()
-        {
         }
     }
 }

@@ -52,19 +52,19 @@ namespace SharpGs.RestApi
                     var isData = false;
                     if (response.StatusCode == HttpStatusCode.OK && objectHead != null)
                     {
-                        objectHead.ContentLength = response.ContentLength;
+                        objectHead.Size = response.ContentLength;
                         objectHead.ContentType = response.ContentType;
                         objectHead.ETag = response.Headers["ETag"];
                         objectHead.LastModified = response.LastModified;
                         if (withData)
                         {
                             isData = true;
-                            objectHead.Content = new byte[objectHead.ContentLength];
+                            objectHead.Content = new byte[objectHead.Size];
                             var read = (long)0;
                             var stream = response.GetResponseStream();
-                            while (read < objectHead.ContentLength)
+                            while (read < objectHead.Size)
                             {
-                                var toread = (int)((objectHead.ContentLength - read)%4048);
+                                var toread = (int)((objectHead.Size - read) % 4048);
                                 read += stream.Read(objectHead.Content, 0, toread);
                             }
                         }

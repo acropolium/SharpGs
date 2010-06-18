@@ -5,12 +5,11 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
-using SharpGs.Internal;
 using SharpGs.RestApi;
 
-namespace SharpGs
+namespace SharpGs.Internal
 {
-    public class SharpGsClient
+    internal class SharpGsClient : ISharpGs
     {
         private const string DefaultGoogleHost = @"commondatastorage.googleapis.com";
 
@@ -19,17 +18,17 @@ namespace SharpGs
             get; set;
         }
 
-        protected string AuthKey
+        public string AuthKey
         {
             get; private set;
         }
 
-        protected string AuthSecret
+        public string AuthSecret
         {
             get; private set;
         }
 
-        protected bool SecuredConnection
+        public bool SecuredConnection
         {
             get; set;
         }
@@ -106,6 +105,8 @@ namespace SharpGs
 
             using (var api = new RestApiClient(ConnectionUrl(requestMethod, bucket, path, parameters), requestMethod))
             {
+                if (objectHead != null)
+                    objectHead.Key = path;
                 var result = api.Request(SyndicateAuthValue(AuthKey, signature), dateO, content, contentTypeFixed, objectHead, withData);
                 if (String.IsNullOrEmpty(result))
                     return null;
@@ -148,9 +149,13 @@ namespace SharpGs
             return Buckets.Where(b => b.Name.Equals(name)).FirstOrDefault();
         }
 
-        public void AddBucket(string name)
+        public void CreateBucket(string name)
         {
             Request(RequestMethod.PUT, name);
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

@@ -1,17 +1,13 @@
-﻿using System;
-
-namespace SharpGs
+﻿namespace SharpGs
 {
-    public interface IObject : IAclSetup
+    /// <summary>
+    /// Google Storage Object information
+    /// </summary>
+    public interface IObject : IAclSetup, IObjectHead
     {
-        IBucket Bucket { get; }
         IOwner Owner { get; }
-        string Key { get; }
-        DateTime LastModified { get; }
-        string ETag { get; }
         string StorageClass { get; }
-        long Size { get; }
-        IObjectData Get();
+        IObjectContent Retrieve();
         void Delete();
     }
 }

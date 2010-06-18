@@ -57,9 +57,9 @@ namespace SharpGs.Internal
             internal set;
         }
 
-        public IObjectData Get()
+        public IObjectContent Retrieve()
         {
-            var oh = new Bucket.ObjectHead { Bucket = Bucket };
+            var oh = new Bucket.ObjectHead(Bucket);
             _connector.Request(RequestMethod.GET, Bucket.Name, Key, null, null, oh, true);
             return oh.ETag == null ? null : oh;
         }

@@ -37,19 +37,25 @@ namespace SharpGs.Internal
             _connector.Request(RequestMethod.PUT, Name, key, content, contentType);
         }
 
-        internal class ObjectHead : IObjectData
+        internal class ObjectHead : IObjectContent
         {
             public IBucket Bucket { get; set; }
             public string ContentType { get; set; }
+            public string Key { get; set; }
             public DateTime LastModified { get; set; }
+            public long Size { get; set; }
             public string ETag { get; set; }
-            public long ContentLength { get; set; }
             public byte[] Content { get; set; }
+
+            public ObjectHead(IBucket ownerBucket)
+            {
+                Bucket = ownerBucket;
+            }
         }
 
-        public IObjectData GetObjectHead(string key)
+        public IObjectContent GetObjectHead(string key)
         {
-            var oh = new ObjectHead {Bucket = this};
+            var oh = new ObjectHead(this);
             _connector.Request(RequestMethod.HEAD, Name, key, null, null, oh);
             return oh.ETag == null ? null : oh;
         }

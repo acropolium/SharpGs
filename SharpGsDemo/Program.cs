@@ -11,12 +11,12 @@ namespace SharpGsDemo
 
         static void Main()
         {
-            var client = new SharpGsClient(AuthKey, AuthSecret);
+            var client = GoogleStorageFactory.Create(AuthKey, AuthSecret);
 
             for (var i = 0; i < 10; i++)
             {
                 // Create a bucket
-                client.AddBucket("temp-bucket-" + new Random().Next());
+                client.CreateBucket("temp-bucket-" + new Random().Next());
             }
 
             // Fetching all buckets of user

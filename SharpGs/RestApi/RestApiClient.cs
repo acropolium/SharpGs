@@ -10,11 +10,13 @@ namespace SharpGs.RestApi
     {
         private readonly Uri _uri;
         private readonly RequestMethod _method;
+        private readonly IWebProxy _webProxy;
 
-        public RestApiClient(Uri uri, RequestMethod method)
+        public RestApiClient(Uri uri, RequestMethod method, IWebProxy proxy = null)
         {
             _uri = uri;
             _method = method;
+            _webProxy = proxy;
         }
 
         internal static RequestMethod PureRequestMethod(RequestMethod method)
@@ -34,6 +36,9 @@ namespace SharpGs.RestApi
         {
             var request = (HttpWebRequest)WebRequest.Create(_uri);
             request.Method = PureRequestMethod(_method).ToString();
+
+            if (_webProxy != null)
+                request.Proxy = _webProxy;
 
             request.Headers.Add(@"Authorization", authValue);
             if (content != null)
@@ -60,12 +65,15 @@ namespace SharpGs.RestApi
                 objectHead.Content = new byte[objectHead.Size];
                 var read = (long)0;
                 var stream = response.GetResponseStream();
-                while (read < objectHead.Size)
+                if (stream != null)
                 {
-                    var toread = (int)((objectHead.Size - read) % 4048);
-                    read += stream.Read(objectHead.Content, 0, toread);
+                    while (read < objectHead.Size)
+                    {
+                        var toread = (int) ((objectHead.Size - read)%4048);
+                        read += stream.Read(objectHead.Content, 0, toread);
+                    }
+                    return true;
                 }
-                return true;
             }
             return false;
         }

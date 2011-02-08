@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 
 namespace SharpGs
 {
@@ -22,6 +23,11 @@ namespace SharpGs
         /// If true, uses https secured protocol. True by default
         /// </summary>
         bool SecuredConnection { get; set; }
+
+        /// <summary>
+        /// If is not null, connection will be done through proxy
+        /// </summary>
+        IWebProxy WebProxy { get; set; }
 
         /// <summary>
         /// Request server for list of buckets

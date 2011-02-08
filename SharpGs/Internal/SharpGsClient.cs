@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
 using SharpGs.RestApi;
+using System.Net;
 
 namespace SharpGs.Internal
 {
@@ -29,6 +30,11 @@ namespace SharpGs.Internal
         }
 
         public bool SecuredConnection
+        {
+            get; set;
+        }
+
+        public IWebProxy WebProxy
         {
             get; set;
         }
@@ -105,7 +111,7 @@ namespace SharpGs.Internal
                 Convert.ToBase64String(
                     new HMACSHA1(Encoding.UTF8.GetBytes(AuthSecret)).ComputeHash(Encoding.UTF8.GetBytes(signatureOrigin)));
 
-            var api = new RestApiClient(ConnectionUrl(requestMethod, bucket, path, parameters), requestMethod);
+            var api = new RestApiClient(ConnectionUrl(requestMethod, bucket, path, parameters), requestMethod, WebProxy);
             if (objectHead != null)
                 objectHead.Key = path;
             var result = api.Request(SyndicateAuthValue(AuthKey, signature), dateO, content, contentTypeFixed,

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using SharpGs;
 
 namespace SharpGsDemo
@@ -13,10 +14,19 @@ namespace SharpGsDemo
         {
             var client = GoogleStorageFactory.Create(AuthKey, AuthSecret);
 
+            //--- Proxy usage (implemented by community user Fabrizio)
+            //IWebProxy proxy = HttpWebRequest.DefaultWebProxy;
+            //proxy.Credentials = CredentialCache.DefaultCredentials;
+            //client.WebProxy = proxy;
+
+            var bucketNames = new HashSet<string>();
+
             for (var i = 0; i < 10; i++)
             {
                 // Create a bucket
-                client.CreateBucket("temp-bucket-" + new Random().Next());
+                var name = "temp-bucket-" + new Random().Next();
+                bucketNames.Add(name);
+                client.CreateBucket(name);
             }
 
             // Fetching all buckets of user
@@ -36,7 +46,8 @@ namespace SharpGsDemo
                 }
                 
                 // Delete bucket
-                bucket.Delete();
+                if (bucketNames.Contains(bucket.Name))
+                    bucket.Delete();
             }
 
             Console.WriteLine("Finished");

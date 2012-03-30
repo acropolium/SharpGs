@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -57,11 +58,21 @@ namespace SharpGs.Internal
             internal set;
         }
 
-        public IObjectContent Retrieve()
+        private IObjectContent RetriveTo(Stream targetStream = null)
         {
-            var oh = new Bucket.ObjectHead(Bucket);
+            var oh = new Bucket.ObjectHead(Bucket, targetStream);
             _connector.Request(RequestMethod.GET, Bucket.Name, Key, null, null, oh, true);
             return oh.ETag == null ? null : oh;
+        }
+
+        public IObjectContent Retrieve()
+        {
+            return RetriveTo();
+        }
+
+        public IObjectContent Retrieve(Stream targetStream)
+        {
+            return RetriveTo(targetStream);
         }
 
         public void Delete()

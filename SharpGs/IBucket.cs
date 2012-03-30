@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace SharpGs
 {
@@ -29,6 +30,15 @@ namespace SharpGs
         /// <param name="content">object body</param>
         /// <param name="contentType">object content type</param>
         void AddObject(string key, byte[] content, string contentType);
+
+        /// <summary>
+        /// Put new object to the bucket
+        /// </summary>
+        /// <param name="key">object path/key</param>
+        /// <param name="stream">stream data</param>
+        /// <param name="contentType">object content type</param>
+        /// <param name="closeStream">flag to close stream after operation</param>
+        void AddObject(string key, Stream stream, string contentType, bool closeStream = false);
 
         /// <summary>
         /// Retrieve only header of the object

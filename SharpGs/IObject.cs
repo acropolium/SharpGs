@@ -1,4 +1,6 @@
-﻿namespace SharpGs
+﻿using System.IO;
+
+namespace SharpGs
 {
     /// <summary>
     /// Google Storage Object information
@@ -20,6 +22,12 @@
         /// </summary>
         /// <returns></returns>
         IObjectContent Retrieve();
+
+        /// <summary>
+        /// Request object form GS into stream (memory, file, etc)
+        /// </summary>
+        /// <returns></returns>
+        IObjectContent Retrieve(Stream targetStream);
 
         /// <summary>
         /// Delete current object from GS

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -34,7 +35,20 @@ namespace SharpGs.Internal
 
         public void AddObject(string key, byte[] content, string contentType)
         {
-            _connector.Request(RequestMethod.PUT, Name, key, content, contentType);
+            AddObject(key, new MemoryStream(content), contentType, true);
+        }
+
+        public void AddObject(string key, Stream stream, string contentType, bool closeStream = false)
+        {
+            try
+            {
+                _connector.RequestStream(RequestMethod.PUT, Name, key, stream, contentType);
+            }
+            finally
+            {
+                if (stream != null && closeStream)
+                    stream.Close();
+            }
         }
 
         internal class ObjectHead : IObjectContent
@@ -47,9 +61,12 @@ namespace SharpGs.Internal
             public string ETag { get; set; }
             public byte[] Content { get; set; }
 
-            public ObjectHead(IBucket ownerBucket)
+            internal Stream TargetStream { get; set; }
+
+            public ObjectHead(IBucket ownerBucket, Stream targetStream = null)
             {
                 Bucket = ownerBucket;
+                TargetStream = targetStream;
             }
         }
 

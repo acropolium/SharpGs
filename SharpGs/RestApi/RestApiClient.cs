@@ -32,7 +32,17 @@ namespace SharpGs.RestApi
             }
         }
 
-        private HttpWebRequest CreateRequest(string authValue, DateTime date, byte[] content, string contentType)
+        public static void CopyStream(Stream input, Stream output)
+        {
+            var buffer = new byte[32768];
+            int read;
+            while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                output.Write(buffer, 0, read);
+            }
+        }
+
+        private HttpWebRequest CreateRequest(string authValue, DateTime date, Stream content, string contentType)
         {
             var request = (HttpWebRequest)WebRequest.Create(_uri);
             request.Method = PureRequestMethod(_method).ToString();
@@ -42,13 +52,20 @@ namespace SharpGs.RestApi
 
             request.Headers.Add(@"Authorization", authValue);
             if (content != null)
+            {
+                content.Seek(0, SeekOrigin.Begin);
                 request.Headers.Add(@"Content-MD5", Convert.ToBase64String(MD5.Create().ComputeHash(content)));
+            }
             request.Date = date;
             request.ContentLength = content == null ? 0 : content.Length;
             request.ContentType = contentType;
             request.KeepAlive = false;
             if (content != null)
-                request.GetRequestStream().Write(content, 0, content.Length);
+            {
+                var resultedStream = request.GetRequestStream();
+                content.Seek(0, SeekOrigin.Begin);
+                CopyStream(content, resultedStream);
+            }
             return request;
         }
 
@@ -62,17 +79,28 @@ namespace SharpGs.RestApi
             objectHead.LastModified = response.LastModified;
             if (withData)
             {
-                objectHead.Content = new byte[objectHead.Size];
-                var read = (long)0;
                 var stream = response.GetResponseStream();
-                if (stream != null)
+                if (objectHead.TargetStream == null)
                 {
-                    while (read < objectHead.Size)
+                    objectHead.Content = new byte[objectHead.Size];
+                    var read = (long) 0;
+                    if (stream != null)
                     {
-                        var toread = (int) ((objectHead.Size - read)%4048);
-                        read += stream.Read(objectHead.Content, 0, toread);
+                        while (read < objectHead.Size)
+                        {
+                            var toread = (int) ((objectHead.Size - read)%4048);
+                            read += stream.Read(objectHead.Content, 0, toread);
+                        }
+                        return true;
                     }
-                    return true;
+                }
+                else
+                {
+                    if (stream != null)
+                    {
+                        CopyStream(stream, objectHead.TargetStream);
+                        return true;
+                    }
                 }
             }
             return false;
@@ -86,7 +114,7 @@ namespace SharpGs.RestApi
             }
         }
 
-        public string Request(string authValue, DateTime date, byte[] content, string contentType, Bucket.ObjectHead objectHead, bool withData)
+        public string Request(string authValue, DateTime date, Stream content, string contentType, Bucket.ObjectHead objectHead, bool withData)
         {
             try
             {

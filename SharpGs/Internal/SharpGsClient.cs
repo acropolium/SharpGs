@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -93,6 +94,20 @@ namespace SharpGs.Internal
 
         internal XDocument Request(RequestMethod requestMethod = RequestMethod.GET, string bucket = null, string path = null, byte[] content = null, string contentType = null, Bucket.ObjectHead objectHead = null, bool withData = false, string parameters = null)
         {
+            var stream = content == null ? null : new MemoryStream(content);
+            try
+            {
+                return RequestStream(requestMethod, bucket, path, stream, contentType, objectHead, withData, parameters);
+            }
+            finally
+            {
+                if (stream != null)
+                    stream.Close();
+            }
+        }
+
+        internal XDocument RequestStream(RequestMethod requestMethod = RequestMethod.GET, string bucket = null, string path = null, Stream content = null, string contentType = null, Bucket.ObjectHead objectHead = null, bool withData = false, string parameters = null)
+        {
             var contentTypeFixed = contentType ?? @"application/xml";
             var dateO = DateTime.UtcNow;
             var date = dateO.ToString(@"ddd, dd MMM yyyy HH':'mm':'ss 'GMT'", CultureInfo.GetCultureInfo("EN-US"));
@@ -153,7 +168,7 @@ namespace SharpGs.Internal
 
         public IBucket GetBucket(string name)
         {
-            return Buckets.Where(b => b.Name.Equals(name)).FirstOrDefault();
+            return Buckets.FirstOrDefault(b => b.Name.Equals(name));
         }
 
         public void CreateBucket(string name)

@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using SharpGs.RestApi;
+using SharpGs.Cors.Internal;
 
-namespace SharpGs.Cors.Internal
+namespace SharpGs.Cors
 {
     public class Cors : ICors
     {

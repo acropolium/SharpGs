@@ -55,7 +55,7 @@
     <Compile Include="Acl\ScopeType.cs" />
     <Compile Include="Cors\ICors.cs" />
     <Compile Include="Cors\IHttpMethods.cs" />
-    <Compile Include="Cors\Internal\Cors.cs" />
+    <Compile Include="Cors\Cors.cs" />
     <Compile Include="Cors\Internal\HttpMethods.cs" />
     <Compile Include="Cors\Internal\Origin.cs" />
     <Compile Include="Cors\Internal\ResponseHeader.cs" />

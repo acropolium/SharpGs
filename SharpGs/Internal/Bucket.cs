@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 using SharpGs.Acl;
 using SharpGs.Acl.Internal;
+using SharpGs.Cors;
 using SharpGs.RestApi;
 
 namespace SharpGs.Internal
@@ -80,6 +81,27 @@ namespace SharpGs.Internal
         public void Delete()
         {
             _connector.Request(RequestMethod.DELETE, Name);
+        }
+
+        /// <summary>
+        /// Retrieve Cross origin resource sharing object for the bucket
+        /// </summary>
+        public ICors Cors
+        {
+            get
+            {
+                var result = _connector.Request(RequestMethod.CORS_GET, Name);
+                return new Cors.Cors(result);
+            }
+        }
+
+        /// <summary>
+        /// Save a new resource sharing object for the bucket
+        /// </summary>
+        /// <param name="cors"></param>
+        public void CorsSave(ICors cors)
+        {
+            _connector.Request(RequestMethod.CORS_SET, Name, null, Encoding.UTF8.GetBytes(cors.ToXmlString()), "application/xml");
         }
 
         public IAccessControlList Acl

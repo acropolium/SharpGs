@@ -52,6 +52,8 @@ namespace SharpGs.Internal
         {
             if (requestMethod == RequestMethod.ACL_GET || requestMethod == RequestMethod.ACL_SET)
                 return "?acl";
+            if (requestMethod == RequestMethod.CORS_GET || requestMethod == RequestMethod.CORS_SET)
+                return "?cors";
             if (parameters != null)
                 return "?" + parameters;
             return String.Empty;
@@ -83,6 +85,8 @@ namespace SharpGs.Internal
                     sb.Append(path);
                 if (requestMethod == RequestMethod.ACL_GET || requestMethod == RequestMethod.ACL_SET)
                     sb.Append("?acl");
+                if (requestMethod == RequestMethod.CORS_GET || requestMethod == RequestMethod.CORS_SET)
+                    sb.Append("?cors");
             }
             return sb.ToString();
         }

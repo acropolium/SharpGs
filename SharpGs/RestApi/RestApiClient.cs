@@ -27,6 +27,10 @@ namespace SharpGs.RestApi
                     return RequestMethod.GET;
                 case RequestMethod.ACL_SET:
                     return RequestMethod.PUT;
+                case RequestMethod.CORS_GET:
+                    return RequestMethod.GET;
+                case RequestMethod.CORS_SET:
+                    return RequestMethod.PUT;
                 default:
                     return method;
             }

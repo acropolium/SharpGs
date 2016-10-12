@@ -8,6 +8,8 @@
         DELETE,
         HEAD,
         ACL_GET,
-        ACL_SET
+        ACL_SET,
+        CORS_GET,
+        CORS_SET
     }
 }

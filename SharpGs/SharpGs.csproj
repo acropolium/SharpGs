@@ -53,6 +53,14 @@
     <Compile Include="Acl\Scopes\UserByEmail.cs" />
     <Compile Include="Acl\Scopes\UserById.cs" />
     <Compile Include="Acl\ScopeType.cs" />
+    <Compile Include="Cors\ICors.cs" />
+    <Compile Include="Cors\IHttpMethods.cs" />
+    <Compile Include="Cors\Cors.cs" />
+    <Compile Include="Cors\Internal\HttpMethods.cs" />
+    <Compile Include="Cors\Internal\Origin.cs" />
+    <Compile Include="Cors\Internal\ResponseHeader.cs" />
+    <Compile Include="Cors\IOrigin.cs" />
+    <Compile Include="Cors\IResponseHeader.cs" />
     <Compile Include="Exceptions\BucketAlreadyOwnedByYou.cs" />
     <Compile Include="Exceptions\BucketAlreadyExists.cs" />
     <Compile Include="Exceptions\InvalidBucketName.cs" />

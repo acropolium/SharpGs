@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using SharpGs.Cors;
 
 namespace SharpGs
 {
@@ -51,5 +52,17 @@ namespace SharpGs
         /// Delete current bucket
         /// </summary>
         void Delete();
+
+        /// <summary>
+        /// Retrieve Cross origin resource sharing object for the bucket
+        /// </summary>
+        ICors Cors { get; }
+
+        /// <summary>
+        /// Save a new resource sharing object for the bucket
+        /// </summary>
+        /// <param name="cors"></param>
+        void CorsSave(ICors cors);
+
     }
 }
